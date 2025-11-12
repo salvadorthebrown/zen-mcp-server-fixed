@@ -207,10 +207,11 @@ class GeminiModelProvider(RegistryBackedProviderMixin, ModelProvider):
 
         def _attempt() -> ModelResponse:
             attempt_counter["value"] += 1
+            # BUGFIX: Remove config parameter - it causes "API key expired" error
+            # Direct API calls work fine without config
             response = self.client.models.generate_content(
                 model=resolved_model_name,
                 contents=contents,
-                config=generation_config,
             )
 
             usage = self._extract_usage(response)
