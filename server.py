@@ -49,12 +49,14 @@ from config import (  # noqa: E402
 )
 from tools import (  # noqa: E402
     AnalyzeTool,
+    AutoTestTool,
     ChallengeTool,
     ChatTool,
     CLinkTool,
     CodeReviewTool,
     ConsensusTool,
     DebugIssueTool,
+    DepMapTool,
     DocgenTool,
     ListModelsTool,
     LookupTool,
@@ -65,6 +67,7 @@ from tools import (  # noqa: E402
     TestGenTool,
     ThinkDeepTool,
     TracerTool,
+    ValidatorTool,
     VersionTool,
 )
 from tools.models import ToolOutput  # noqa: E402
@@ -270,6 +273,9 @@ TOOLS = {
     "secaudit": SecauditTool(),  # Comprehensive security audit with OWASP Top 10 and compliance coverage
     "docgen": DocgenTool(),  # Step-by-step documentation generation with complexity analysis
     "analyze": AnalyzeTool(),  # General-purpose file and code analysis
+    "autotest": AutoTestTool(),  # Automatically runs relevant tests for changed files
+    "depmap": DepMapTool(),  # Maps import dependencies showing what files import/are imported by target
+    "validator": ValidatorTool(),  # Validates Python syntax and imports without execution
     "refactor": RefactorTool(),  # Step-by-step refactoring analysis workflow with expert validation
     "tracer": TracerTool(),  # Static call path prediction and control flow analysis
     "testgen": TestGenTool(),  # Step-by-step test generation workflow with expert validation
