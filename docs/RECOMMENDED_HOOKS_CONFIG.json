@@ -1,0 +1,140 @@
+{
+  "hooks": {
+    "afterWrite": [
+      {
+        "name": "auto-validate-python",
+        "description": "Automatically validate Python files after Claude writes them",
+        "filePattern": "**/*.py",
+        "enabled": true,
+        "trigger": {
+          "action": "call_mcp_tool",
+          "tool": "mcp__zen__validator",
+          "params": {
+            "target_file": "{absolutePath}",
+            "check_imports": true,
+            "model": "gemini-2.5-flash"
+          }
+        },
+        "onFailure": "notify",
+        "blocking": false
+      },
+      {
+        "name": "auto-test-on-change",
+        "description": "Run tests automatically after Claude modifies code files",
+        "filePattern": "**/{backend,frontend,src}/**/*.py",
+        "enabled": true,
+        "trigger": {
+          "action": "call_mcp_tool",
+          "tool": "mcp__zen__autotest",
+          "params": {
+            "working_directory": "{projectRoot}",
+            "test_framework": "pytest",
+            "model": "gemini-2.5-flash"
+          }
+        },
+        "onFailure": "notify",
+        "blocking": false,
+        "debounce": 5000
+      }
+    ],
+    "beforeEdit": [
+      {
+        "name": "check-dependencies-before-refactor",
+        "description": "Check import dependencies when Claude is about to edit critical files",
+        "filePattern": "**/{api,core,services,models}/**/*.py",
+        "enabled": true,
+        "trigger": {
+          "action": "call_mcp_tool",
+          "tool": "mcp__zen__depmap",
+          "params": {
+            "target_file": "{absolutePath}",
+            "working_directory": "{projectRoot}",
+            "depth": 1,
+            "model": "gemini-2.5-flash"
+          }
+        },
+        "onFailure": "warn",
+        "blocking": false
+      }
+    ],
+    "beforeCommit": [
+      {
+        "name": "validate-all-changes",
+        "description": "Validate all changed Python files before committing",
+        "filePattern": "**/*.py",
+        "enabled": true,
+        "trigger": {
+          "action": "call_mcp_tool_batch",
+          "tool": "mcp__zen__validator",
+          "forEachFile": true,
+          "params": {
+            "target_file": "{absolutePath}",
+            "check_imports": true,
+            "model": "gemini-2.5-flash"
+          }
+        },
+        "onFailure": "block",
+        "blocking": true
+      },
+      {
+        "name": "run-tests-before-commit",
+        "description": "Run test suite before Claude commits",
+        "enabled": true,
+        "trigger": {
+          "action": "call_mcp_tool",
+          "tool": "mcp__zen__autotest",
+          "params": {
+            "working_directory": "{projectRoot}",
+            "test_framework": "pytest",
+            "model": "gemini-2.5-flash"
+          }
+        },
+        "onFailure": "block",
+        "blocking": true
+      }
+    ],
+    "onError": [
+      {
+        "name": "auto-debug-on-error",
+        "description": "Automatically debug when Claude encounters errors",
+        "errorPattern": ".*",
+        "enabled": true,
+        "trigger": {
+          "action": "call_mcp_tool",
+          "tool": "mcp__zen__debug",
+          "params": {
+            "step": "Investigating error: {errorMessage}. Checking {errorFile}:{errorLine}",
+            "step_number": 1,
+            "total_steps": 3,
+            "next_step_required": true,
+            "findings": "Error occurred during {action}",
+            "model": "gemini-2.5-pro"
+          }
+        },
+        "onFailure": "notify",
+        "blocking": false
+      }
+    ]
+  },
+  "settings": {
+    "autoToolExecution": {
+      "enabled": true,
+      "requireConfirmation": false,
+      "showToolOutput": true,
+      "logLevel": "info"
+    },
+    "validation": {
+      "pythonFiles": {
+        "enabled": true,
+        "checkSyntax": true,
+        "checkImports": true,
+        "checkTypes": false
+      }
+    },
+    "testing": {
+      "autoRun": true,
+      "debounceMs": 5000,
+      "framework": "pytest"
+    }
+  }
+}
